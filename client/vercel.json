@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://lastmile-d7sg.onrender.com/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/:path*", "destination": "https://lastmile-d7sg.onrender.com/api/:path*" },
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
