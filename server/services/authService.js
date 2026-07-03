@@ -165,7 +165,10 @@ export class AuthService {
       }
     });
 
-    await notificationService.sendVerificationOtp(user.email, user.name, otp);
+    // Send Verification Email (Asynchronously in background)
+    notificationService.sendVerificationOtp(user.email, user.name, otp).catch(err => {
+      console.error('⚠️ [AuthResend] Background resend OTP dispatch failed:', err.message);
+    });
 
     return { success: true, message: 'Verification code resent successfully' };
   }
