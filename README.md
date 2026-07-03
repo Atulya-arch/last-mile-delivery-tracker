@@ -109,7 +109,3 @@ Use the quick-action buttons on the login screen to auto-fill the pre-seeded cre
   * **Email**: `john@example.com`
   * **Password**: `john@5432`
 
----
-
-## 📄 License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
