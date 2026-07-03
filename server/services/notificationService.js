@@ -71,6 +71,53 @@ class NotificationService {
    * @param {string} text 
    */
   async sendEmail(to, subject, text) {
+    // 1. SendGrid HTTP API Integration (Port 443 - Bypass Render Firewall)
+    if (process.env.SENDGRID_API_KEY) {
+      const apiKey = process.env.SENDGRID_API_KEY;
+      // SendGrid expects verified raw email as sender address
+      let fromEmail = env.SMTP_FROM || 'noreply@deliverytracker.com';
+      if (fromEmail.includes('<')) {
+        fromEmail = fromEmail.split('<')[1].replace('>', '').trim();
+      }
+
+      console.log(`📬 [SendGrid] Attempting HTTP API email dispatch to ${to} (Sender: ${fromEmail})...`);
+      try {
+        const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            personalizations: [{
+              to: [{ email: to }]
+            }],
+            from: {
+              email: fromEmail,
+              name: 'Last Mile Tracker'
+            },
+            subject: subject,
+            content: [{
+              type: 'text/plain',
+              value: text
+            }]
+          })
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(errText || `HTTP Status ${response.status}`);
+        }
+
+        console.log(`📬 [SendGrid] Email sent successfully via HTTP API to ${to}!`);
+        return;
+      } catch (error) {
+        console.error(`❌ [SendGrid] HTTP API dispatch failed:`, error.message);
+        console.log('🔄 [Notification] Falling back to standard SMTP / mock transporter...');
+      }
+    }
+
+    // 2. Resend HTTP API Integration
     if (process.env.RESEND_API_KEY) {
       const apiKey = process.env.RESEND_API_KEY;
       let from = env.SMTP_FROM || 'onboarding@resend.dev';
