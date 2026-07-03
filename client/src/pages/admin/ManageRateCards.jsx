@@ -195,7 +195,7 @@ export const ManageRateCards = () => {
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase">Base Price ($)</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Base Price (₹)</label>
               <input
                 type="number"
                 name="basePrice"
@@ -210,7 +210,7 @@ export const ManageRateCards = () => {
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase">Price per extra KG ($)</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Price per extra KG (₹)</label>
               <input
                 type="number"
                 name="pricePerKg"
@@ -225,7 +225,7 @@ export const ManageRateCards = () => {
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase">COD Surcharge ($)</label>
+              <label class="block text-xs font-semibold text-gray-500 uppercase">COD Surcharge (₹)</label>
               <input
                 type="number"
                 name="codSurcharge"
@@ -283,9 +283,9 @@ export const ManageRateCards = () => {
                       </td>
                       <td class="p-4 font-bold text-slate-500">{rc.orderType}</td>
                       <td class="p-4 text-gray-600">{rc.baseWeightLimit} kg</td>
-                      <td class="p-4 font-semibold text-gray-900">${rc.basePrice.toFixed(2)}</td>
-                      <td class="p-4 text-gray-600">${rc.pricePerKg.toFixed(2)}/kg</td>
-                      <td class="p-4 text-red-500">${rc.codSurcharge.toFixed(2)}</td>
+                      <td class="p-4 font-semibold text-gray-900">₹{rc.basePrice.toFixed(2)}</td>
+                      <td class="p-4 text-gray-600">₹{rc.pricePerKg.toFixed(2)}/kg</td>
+                      <td class="p-4 text-red-500">₹{rc.codSurcharge.toFixed(2)}</td>
                       <td class="p-4 text-right">
                         <button
                           onClick={() => handleDelete(rc.id)}

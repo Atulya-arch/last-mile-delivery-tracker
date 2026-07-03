@@ -336,16 +336,16 @@ export const PlaceOrder = () => {
                 <hr class="border-gray-100" />
                 <div class="flex justify-between">
                   <span class="text-gray-500">Base Price:</span>
-                  <span class="font-medium">${quote.basePrice.toFixed(2)}</span>
+                  <span class="font-medium">₹{quote.basePrice.toFixed(2)}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-500">Weight Surcharge:</span>
-                  <span class="font-medium">${quote.weightSurcharge.toFixed(2)}</span>
+                  <span class="font-medium">₹{quote.weightSurcharge.toFixed(2)}</span>
                 </div>
                 {quote.codSurcharge > 0 && (
                   <div class="flex justify-between">
                     <span class="text-gray-500">COD Surcharge:</span>
-                    <span class="font-medium text-red-500">+${quote.codSurcharge.toFixed(2)}</span>
+                    <span class="font-medium text-red-500">+₹{quote.codSurcharge.toFixed(2)}</span>
                   </div>
                 )}
                 <div class="flex justify-between">
@@ -360,7 +360,7 @@ export const PlaceOrder = () => {
 
               <div class="pt-4 border-t border-gray-200 flex justify-between items-baseline">
                 <span class="font-bold text-gray-900">Total Price:</span>
-                <span class="text-3xl font-extrabold text-indigo-600">${quote.finalPrice.toFixed(2)}</span>
+                <span class="text-3xl font-extrabold text-indigo-600">₹{quote.finalPrice.toFixed(2)}</span>
               </div>
 
               <button

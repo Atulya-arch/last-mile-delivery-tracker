@@ -152,7 +152,7 @@ export const Landing = () => {
               </div>
               <div class="flex justify-between items-baseline text-xs text-slate-500">
                 <span>Route: Downtown ➔ Airport</span>
-                <span class="text-indigo-900 font-bold text-sm">$45.00</span>
+                <span class="text-indigo-900 font-bold text-sm">₹45.00</span>
               </div>
               <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div class="bg-indigo-600 h-full w-[45%] rounded-full"></div>

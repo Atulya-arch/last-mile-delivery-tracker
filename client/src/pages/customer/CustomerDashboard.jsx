@@ -131,7 +131,7 @@ export const CustomerDashboard = () => {
                   <tr key={order.id} class="hover:bg-gray-50/50 transition-colors">
                     <td class="p-4 font-bold text-gray-900">{order.orderNumber}</td>
                     <td class="p-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td class="p-4 font-semibold text-gray-950">${order.price.toFixed(2)}</td>
+                    <td class="p-4 font-semibold text-gray-950">₹{order.price.toFixed(2)}</td>
                     <td class="p-4">{getStatusBadge(order.status)}</td>
                     <td class="p-4 text-right">
                       <Link

@@ -210,7 +210,7 @@ export const TrackOrder = () => {
               </div>
               <div class="flex items-center gap-1">
                 <span class="font-bold text-gray-800">Final Price:</span>
-                <span class="text-xl font-extrabold text-indigo-600">${order.price.toFixed(2)}</span>
+                <span class="text-xl font-extrabold text-indigo-600">₹{order.price.toFixed(2)}</span>
               </div>
             </div>
 

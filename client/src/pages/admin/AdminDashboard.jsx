@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api.js';
 import { 
   Package, 
-  DollarSign, 
+  IndianRupee, 
   UserCheck, 
   Clock, 
   Settings, 
@@ -361,11 +361,11 @@ export const AdminDashboard = () => {
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
             <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4 hover:translate-y-[-2px] transition-all">
               <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600">
-                <DollarSign class="h-6 w-6" />
+                <IndianRupee class="h-6 w-6" />
               </div>
               <div>
                 <p class="text-xs font-semibold text-slate-400 uppercase">Total Revenue</p>
-                <h3 class="text-2xl font-black text-indigo-950">${summary?.totalRevenue?.toFixed(2) || '0.00'}</h3>
+                <h3 class="text-2xl font-black text-indigo-950">₹{summary?.totalRevenue?.toFixed(2) || '0.00'}</h3>
               </div>
             </div>
 
@@ -458,7 +458,7 @@ export const AdminDashboard = () => {
                           <span class="font-semibold block">{order.customer?.name || 'Unknown Customer'}</span>
                           <span class="text-[10px] text-slate-400 block mt-0.5">{order.customer?.email || 'No Email'}</span>
                         </td>
-                        <td class="p-4 font-bold text-slate-700">${order.price?.toFixed(2) || '0.00'}</td>
+                        <td class="p-4 font-bold text-slate-700">₹{order.price?.toFixed(2) || '0.00'}</td>
                         <td class="p-4">{getStatusBadge(order.status)}</td>
                         <td class="p-4 text-xs font-semibold text-slate-600">
                           {order.agent ? (
@@ -833,7 +833,7 @@ export const AdminDashboard = () => {
               <div class="space-y-6">
                 <div class="p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex flex-col items-center">
                   <span class="text-xs text-indigo-700 font-bold tracking-wide uppercase">Final Quote Rate</span>
-                  <span class="text-4xl font-black text-indigo-950 mt-2">${quote.finalPrice.toFixed(2)}</span>
+                  <span class="text-4xl font-black text-indigo-950 mt-2">₹{quote.finalPrice.toFixed(2)}</span>
                   <span class="text-[10px] text-indigo-500/80 mt-1 block">Includes base weights & tax overrides</span>
                 </div>
 
@@ -844,15 +844,15 @@ export const AdminDashboard = () => {
                   </div>
                   <div class="flex justify-between">
                     <span class="text-slate-400 font-semibold">Base shipping cost:</span>
-                    <span class="font-bold text-slate-700">${quote.basePrice.toFixed(2)}</span>
+                    <span class="font-bold text-slate-700">₹{quote.basePrice.toFixed(2)}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-slate-400 font-semibold">Weight surcharge:</span>
-                    <span class="font-bold text-slate-700">${quote.weightSurcharge.toFixed(2)}</span>
+                    <span class="font-bold text-slate-700">₹{quote.weightSurcharge.toFixed(2)}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-slate-400 font-semibold">COD Surcharge:</span>
-                    <span class="font-bold text-slate-700">${quote.codSurcharge.toFixed(2)}</span>
+                    <span class="font-bold text-slate-700">₹{quote.codSurcharge.toFixed(2)}</span>
                   </div>
                 </div>
 
