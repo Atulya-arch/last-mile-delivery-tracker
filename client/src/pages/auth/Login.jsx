@@ -102,10 +102,46 @@ export const Login = () => {
           </div>
         </form>
 
-        <div class="text-center mt-4">
-          <p class="text-sm text-gray-600">
+        {/* Demo Credentials Box */}
+        <div class="mt-6 border-t border-slate-100 pt-4 space-y-3">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider text-left">Demo Portals (Click to Autofill)</h4>
+          <div class="grid grid-cols-1 gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@example.com');
+                setPassword('password123');
+              }}
+              class="flex items-center justify-between p-3 bg-indigo-50/40 hover:bg-indigo-50 border border-indigo-100/60 rounded-xl transition-all text-left w-full group"
+            >
+              <div>
+                <span class="font-bold text-indigo-950 block">System Admin Dashboard</span>
+                <span class="text-[10px] text-indigo-600/80 mt-0.5 block">admin@example.com | password123</span>
+              </div>
+              <span class="text-[10px] font-bold text-indigo-700 bg-white px-2 py-1 rounded-md border border-indigo-100 opacity-60 group-hover:opacity-100 transition-opacity">Use Portal</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('john@example.com');
+                setPassword('john@5432');
+              }}
+              class="flex items-center justify-between p-3 bg-amber-50/30 hover:bg-amber-50/60 border border-amber-100/50 rounded-xl transition-all text-left w-full group"
+            >
+              <div>
+                <span class="font-bold text-amber-950 block">Delivery Agent Dashboard</span>
+                <span class="text-[10px] text-amber-600/80 mt-0.5 block">john@example.com | john@5432</span>
+              </div>
+              <span class="text-[10px] font-bold text-amber-700 bg-white px-2 py-1 rounded-md border border-amber-100/50 opacity-60 group-hover:opacity-100 transition-opacity">Use Portal</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center mt-6">
+          <p class="text-sm text-slate-500">
             Don't have an account?{' '}
-            <Link to="/register" class="font-semibold text-indigo-600 hover:text-indigo-600 transition-colors">
+            <Link to="/register" class="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
               Create an account
             </Link>
           </p>

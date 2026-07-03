@@ -227,6 +227,32 @@ async function main() {
     console.log('ℹ️ Bob Agent already exists. Skipping profile creation.');
   }
 
+  // Seed John (Agent with linked AgentProfile)
+  const johnUser = await prisma.user.findUnique({ where: { email: 'john@example.com' } });
+  if (!johnUser) {
+    const johnPasswordHash = await bcrypt.hash('john@5432', 10);
+    const john = await prisma.user.create({
+      data: {
+        email: 'john@example.com',
+        passwordHash: johnPasswordHash,
+        role: 'AGENT',
+        name: 'John Agent',
+        phone: '9876001122',
+        agentProfile: {
+          create: {
+            licenseNumber: 'LIC-JOHN-5432',
+            vehicleType: 'Car',
+            zoneId: zones['North Zone'],
+            status: 'AVAILABLE'
+          }
+        }
+      }
+    });
+    console.log(`✅ Seeded Agent John: ${john.email}`);
+  } else {
+    console.log('ℹ️ John Agent already exists. Skipping profile creation.');
+  }
+
   console.log('🌱 Comprehensive seeding completed.');
 }
 
