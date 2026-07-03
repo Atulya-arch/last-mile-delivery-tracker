@@ -83,6 +83,20 @@ export class OrderRepository {
 
     return prisma.deliveryOrder.findMany({
       where: queryConditions,
+      include: {
+        customer: {
+          select: { id: true, name: true, email: true, phone: true }
+        },
+        agent: {
+          select: { id: true, name: true, email: true, phone: true }
+        },
+        pickupArea: {
+          include: { zone: { select: { id: true, name: true } } }
+        },
+        dropArea: {
+          include: { zone: { select: { id: true, name: true } } }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     });
   }

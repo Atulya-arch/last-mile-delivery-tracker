@@ -451,14 +451,14 @@ export const AdminDashboard = () => {
                       <tr key={order.id} class="hover:bg-slate-50/30 transition-colors">
                         <td class="p-4 font-bold text-indigo-950">{order.orderNumber}</td>
                         <td class="p-4 text-xs">
-                          <span class="font-semibold block">{order.pickupArea.name} ➔ {order.dropArea.name}</span>
-                          <span class="text-[10px] text-slate-400 block mt-0.5">{order.pickupArea.zone.name}</span>
+                          <span class="font-semibold block">{order.pickupArea?.name || 'Unknown'} ➔ {order.dropArea?.name || 'Unknown'}</span>
+                          <span class="text-[10px] text-slate-400 block mt-0.5">{order.pickupArea?.zone?.name || 'Unknown Zone'}</span>
                         </td>
                         <td class="p-4 text-xs">
-                          <span class="font-semibold block">{order.customer.name}</span>
-                          <span class="text-[10px] text-slate-400 block mt-0.5">{order.customer.email}</span>
+                          <span class="font-semibold block">{order.customer?.name || 'Unknown Customer'}</span>
+                          <span class="text-[10px] text-slate-400 block mt-0.5">{order.customer?.email || 'No Email'}</span>
                         </td>
-                        <td class="p-4 font-bold text-slate-700">${order.price.toFixed(2)}</td>
+                        <td class="p-4 font-bold text-slate-700">${order.price?.toFixed(2) || '0.00'}</td>
                         <td class="p-4">{getStatusBadge(order.status)}</td>
                         <td class="p-4 text-xs font-semibold text-slate-600">
                           {order.agent ? (
