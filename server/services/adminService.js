@@ -102,7 +102,7 @@ export class AdminService {
     return rateCardRepository.softDelete(id);
   }
 
-  // === AGENT LOOKUPS ===
+  // === AGENT LOOKUPS & MANAGEMENT ===
 
   async listAgents() {
     return prisma.user.findMany({
@@ -111,7 +111,116 @@ export class AdminService {
         deletedAt: null
       },
       include: {
-        agentProfile: true
+        agentProfile: {
+          include: {
+            zone: true
+          }
+        }
+      },
+      orderBy: { name: 'asc' }
+    });
+  }
+
+  async updateAgentProfile(agentUserId, data) {
+    const user = await prisma.user.findFirst({
+      where: { id: agentUserId, role: 'AGENT', deletedAt: null }
+    });
+    if (!user) {
+      throw new NotFoundError('Agent user not found or is inactive');
+    }
+
+    const { zoneId, status } = data;
+    const updatePayload = {};
+    if (zoneId !== undefined) {
+      if (zoneId !== null) {
+        const zone = await prisma.zone.findFirst({ where: { id: zoneId, deletedAt: null } });
+        if (!zone) throw new NotFoundError('Target zone not found');
+      }
+      updatePayload.zoneId = zoneId;
+    }
+    if (status !== undefined) {
+      updatePayload.status = status;
+    }
+
+    const profile = await prisma.agentProfile.update({
+      where: { userId: agentUserId },
+      data: updatePayload
+    });
+
+    // Trigger retroactive matching if status becomes AVAILABLE or zoneId changes
+    if (status === 'AVAILABLE' || zoneId !== undefined) {
+      try {
+        const assignmentService = (await import('./assignmentService.js')).default;
+        await assignmentService.autoAssignPendingOrdersForAgent(agentUserId);
+      } catch (err) {
+        console.error('⚠️ [AdminAgentUpdate] AutoAssign trigger error:', err.message);
+      }
+    }
+
+    return profile;
+  }
+
+  async deleteAgent(agentUserId) {
+    const user = await prisma.user.findFirst({
+      where: { id: agentUserId, role: 'AGENT', deletedAt: null }
+    });
+    if (!user) {
+      throw new NotFoundError('Agent user not found or already deactivated');
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const now = new Date();
+      // Soft delete user
+      await tx.user.update({
+        where: { id: agentUserId },
+        data: { deletedAt: now }
+      });
+
+      // Soft delete agent profile
+      await tx.agentProfile.update({
+        where: { userId: agentUserId },
+        data: { deletedAt: now }
+      });
+
+      // Release any active orders assigned to this agent back to CREATED pool
+      const activeOrders = await tx.deliveryOrder.findMany({
+        where: { 
+          agentId: agentUserId, 
+          status: { in: ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY'] }, 
+          deletedAt: null 
+        }
+      });
+
+      for (const order of activeOrders) {
+        await tx.deliveryOrder.update({
+          where: { id: order.id },
+          data: { agentId: null, status: 'CREATED' }
+        });
+        await tx.trackingHistory.create({
+          data: {
+            orderId: order.id,
+            status: 'CREATED',
+            changedById: agentUserId,
+            notes: 'Agent profile deactivated by administrator. Order returned to pool.'
+          }
+        });
+      }
+    });
+
+    return { id: agentUserId };
+  }
+
+  async listCustomers() {
+    return prisma.user.findMany({
+      where: {
+        role: 'CUSTOMER',
+        deletedAt: null
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true
       },
       orderBy: { name: 'asc' }
     });

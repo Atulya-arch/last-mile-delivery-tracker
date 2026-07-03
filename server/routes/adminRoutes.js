@@ -19,7 +19,12 @@ router.post('/rate-cards', authenticate, authorize('ADMIN'), adminController.cre
 router.get('/rate-cards', authenticate, authorize('ADMIN'), adminController.getRateCards);
 router.delete('/rate-cards/:id', authenticate, authorize('ADMIN'), adminController.deleteRateCard);
 
-// Agent lookup routes
+// Agent lookup and management routes
 router.get('/agents', authenticate, authorize('ADMIN'), adminController.getAgents);
+router.put('/agents/:id/profile', authenticate, authorize('ADMIN'), adminController.updateAgent);
+router.delete('/agents/:id', authenticate, authorize('ADMIN'), adminController.deleteAgent);
+
+// Customer lookup routes
+router.get('/customers', authenticate, authorize('ADMIN'), adminController.getCustomers);
 
 export default router;

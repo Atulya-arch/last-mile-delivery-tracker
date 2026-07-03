@@ -110,12 +110,41 @@ export class AdminController {
     }
   }
 
-  // === AGENT LOOKUPS ===
+  // === AGENT LOOKUPS & MANAGEMENT ===
 
   async getAgents(req, res, next) {
     try {
       const agents = await adminService.listAgents();
       res.status(200).json(successResponse('Agents list retrieved successfully', { agents }));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateAgent(req, res, next) {
+    try {
+      const { id } = req.params;
+      const profile = await adminService.updateAgentProfile(id, req.body);
+      res.status(200).json(successResponse('Agent profile updated successfully', { profile }));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteAgent(req, res, next) {
+    try {
+      const { id } = req.params;
+      await adminService.deleteAgent(id);
+      res.status(200).json(successResponse('Agent profile deactivated successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCustomers(req, res, next) {
+    try {
+      const customers = await adminService.listCustomers();
+      res.status(200).json(successResponse('Customers list retrieved successfully', { customers }));
     } catch (error) {
       next(error);
     }
