@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://lastmile-d7sg.onrender.com/api/:path*" },
+    { "source": "/:path*", "destination": "/client/dist/index.html" }
+  ]
+}
