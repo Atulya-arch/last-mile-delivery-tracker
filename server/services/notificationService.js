@@ -65,6 +65,65 @@ class NotificationService {
   }
 
   /**
+   * Universal email dispatcher supporting both Resend HTTP API and Nodemailer SMTP fallback.
+   * @param {string} to 
+   * @param {string} subject 
+   * @param {string} text 
+   */
+  async sendEmail(to, subject, text) {
+    if (process.env.RESEND_API_KEY) {
+      const apiKey = process.env.RESEND_API_KEY;
+      let from = env.SMTP_FROM || 'onboarding@resend.dev';
+      if (from === 'noreply@deliverytracker.com') {
+        from = 'onboarding@resend.dev'; // Fallback to Resend onboarding sandbox email
+      }
+      
+      console.log(`📬 [Resend] Attempting HTTP API email dispatch to ${to}...`);
+      try {
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            from: from.includes('<') ? from : `"Last Mile Tracker" <${from}>`,
+            to,
+            subject,
+            text
+          })
+        });
+
+        const resData = await response.json();
+        if (!response.ok) {
+          throw new Error(resData.message || JSON.stringify(resData));
+        }
+
+        console.log(`📬 [Resend] Email sent successfully via HTTP API! ID: ${resData.id}`);
+        return;
+      } catch (error) {
+        console.error(`❌ [Resend] HTTP API dispatch failed:`, error.message);
+        console.log('🔄 [Notification] Falling back to standard SMTP / mock transporter...');
+      }
+    }
+
+    // Standard Nodemailer SMTP / Mock Fallback
+    const client = await this.getTransporter();
+    const mailOptions = {
+      from: env.SMTP_FROM,
+      to,
+      subject,
+      text
+    };
+
+    const info = await client.sendMail(mailOptions);
+    console.log(`📬 [Notification] Email sent via SMTP to ${to} | Msg ID: ${info.messageId}`);
+    if (this.isMock && info.previewUrl) {
+      console.log(`🔗 [Notification Mock Preview]: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+  }
+
+  /**
    * Send transactional email notifications on delivery status updates.
    * @param {string} orderId 
    */
@@ -76,7 +135,6 @@ class NotificationService {
         return;
       }
 
-      const client = await this.getTransporter();
       const customerEmail = order.customer.email;
       const customerName = order.customer.name;
       const orderNo = order.orderNumber;
@@ -124,19 +182,7 @@ class NotificationService {
 
       bodyText += '\n\nBest regards,\nLast Mile Delivery Team';
 
-      const mailOptions = {
-        from: env.SMTP_FROM,
-        to: customerEmail,
-        subject,
-        text: bodyText
-      };
-
-      const info = await client.sendMail(mailOptions);
-      console.log(`📬 [Notification] Email sent for Order ${orderNo} | Status: ${status} | Msg ID: ${info.messageId}`);
-      
-      if (this.isMock && info.previewUrl) {
-        console.log(`🔗 [Notification Mock Preview]: ${nodemailer.getTestMessageUrl(info)}`);
-      }
+      await this.sendEmail(customerEmail, subject, bodyText);
     } catch (error) {
       console.error('❌ [Notification] Email dispatch failed:', error.message);
     }
@@ -144,22 +190,10 @@ class NotificationService {
 
   async sendVerificationOtp(email, name, otp) {
     try {
-      const client = await this.getTransporter();
       const subject = 'Verify Your Last Mile Tracker Account';
       const bodyText = `Hello ${name},\n\nThank you for registering with Last Mile Delivery Tracker.\n\nYour 6-digit Email Verification OTP code is:\n\n👉  ${otp}  👈\n\nThis code will expire in 15 minutes.\n\nBest regards,\nLast Mile Delivery Team`;
 
-      const mailOptions = {
-        from: env.SMTP_FROM,
-        to: email,
-        subject,
-        text: bodyText
-      };
-
-      const info = await client.sendMail(mailOptions);
-      console.log(`📬 [Verification] OTP email sent to ${email} | Msg ID: ${info.messageId}`);
-      if (this.isMock && info.previewUrl) {
-        console.log(`🔗 [Verification Mock Preview]: ${nodemailer.getTestMessageUrl(info)}`);
-      }
+      await this.sendEmail(email, subject, bodyText);
     } catch (error) {
       console.error(`❌ [Verification] Failed to send OTP to ${email}:`, error.message);
     }
