@@ -26,6 +26,9 @@ class NotificationService {
         auth: {
           user: env.SMTP_USER,
           pass: env.SMTP_PASS
+        },
+        tls: {
+          rejectUnauthorized: false
         }
       });
       this.isMock = false;
