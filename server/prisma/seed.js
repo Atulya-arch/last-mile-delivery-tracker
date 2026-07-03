@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -167,6 +168,63 @@ async function main() {
       }
     });
     console.log(`✅ Seeded RateCard: ${rc.pickupZoneName} ➔ ${rc.dropZoneName} [${rc.orderType}]`);
+  }
+
+  // 5. Seed Test Users (Idempotently)
+  console.log('🌱 Seeding user accounts...');
+  const passwordHash = await bcrypt.hash('password123', 10);
+
+  // Seed Alice (Customer)
+  await prisma.user.upsert({
+    where: { email: 'alice@example.com' },
+    update: {},
+    create: {
+      email: 'alice@example.com',
+      passwordHash,
+      role: 'CUSTOMER',
+      name: 'Alice Customer',
+      phone: '1234567890'
+    }
+  });
+  console.log('✅ Seeded Customer: alice@example.com');
+
+  // Seed Admin
+  await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      email: 'admin@example.com',
+      passwordHash,
+      role: 'ADMIN',
+      name: 'System Admin',
+      phone: '5555555555'
+    }
+  });
+  console.log('✅ Seeded Admin: admin@example.com');
+
+  // Seed Bob (Agent with linked AgentProfile)
+  const bobUser = await prisma.user.findUnique({ where: { email: 'bob@example.com' } });
+  if (!bobUser) {
+    const bob = await prisma.user.create({
+      data: {
+        email: 'bob@example.com',
+        passwordHash,
+        role: 'AGENT',
+        name: 'Bob Agent',
+        phone: '9876543210',
+        agentProfile: {
+          create: {
+            licenseNumber: 'LIC-BOB-9988',
+            vehicleType: 'Motorcycle',
+            zoneId: zones['North Zone'],
+            status: 'AVAILABLE'
+          }
+        }
+      }
+    });
+    console.log(`✅ Seeded Agent Bob: ${bob.email}`);
+  } else {
+    console.log('ℹ️ Bob Agent already exists. Skipping profile creation.');
   }
 
   console.log('🌱 Comprehensive seeding completed.');
