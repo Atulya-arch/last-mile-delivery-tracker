@@ -138,6 +138,29 @@ class NotificationService {
       console.error('❌ [Notification] Email dispatch failed:', error.message);
     }
   }
+
+  async sendVerificationOtp(email, name, otp) {
+    try {
+      const client = await this.getTransporter();
+      const subject = 'Verify Your Last Mile Tracker Account';
+      const bodyText = `Hello ${name},\n\nThank you for registering with Last Mile Delivery Tracker.\n\nYour 6-digit Email Verification OTP code is:\n\n👉  ${otp}  👈\n\nThis code will expire in 15 minutes.\n\nBest regards,\nLast Mile Delivery Team`;
+
+      const mailOptions = {
+        from: env.SMTP_FROM,
+        to: email,
+        subject,
+        text: bodyText
+      };
+
+      const info = await client.sendMail(mailOptions);
+      console.log(`📬 [Verification] OTP email sent to ${email} | Msg ID: ${info.messageId}`);
+      if (this.isMock && info.previewUrl) {
+        console.log(`🔗 [Verification Mock Preview]: ${nodemailer.getTestMessageUrl(info)}`);
+      }
+    } catch (error) {
+      console.error(`❌ [Verification] Failed to send OTP to ${email}:`, error.message);
+    }
+  }
 }
 
 export default new NotificationService();

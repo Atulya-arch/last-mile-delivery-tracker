@@ -40,10 +40,14 @@ export const Register = () => {
     }
 
     try {
-      const user = await register(payload);
-      if (user.role === 'ADMIN') navigate('/admin');
-      else if (user.role === 'AGENT') navigate('/agent');
-      else navigate('/customer');
+      const res = await register(payload);
+      if (res && res.requiresVerification) {
+        navigate(`/verify-otp?email=${encodeURIComponent(payload.email)}`);
+      } else if (res) {
+        if (res.role === 'ADMIN') navigate('/admin');
+        else if (res.role === 'AGENT') navigate('/agent');
+        else navigate('/customer');
+      }
     } catch (err) {
       if (err.response?.data?.errors) {
         // Handle Zod validation formatting

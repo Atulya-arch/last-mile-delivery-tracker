@@ -17,12 +17,16 @@ export const Login = () => {
     setSubmitting(true);
     try {
       const user = await login(email, password);
-      // Route based on role
       if (user.role === 'ADMIN') navigate('/admin');
       else if (user.role === 'AGENT') navigate('/agent');
       else navigate('/customer');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      const errMsg = err.response?.data?.message;
+      if (errMsg === 'EMAIL_NOT_VERIFIED') {
+        navigate(`/verify-otp?email=${encodeURIComponent(email)}`);
+      } else {
+        setError(errMsg || 'Invalid email or password');
+      }
     } finally {
       setSubmitting(false);
     }

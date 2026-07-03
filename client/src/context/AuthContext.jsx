@@ -46,13 +46,22 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.post('/auth/register', userData);
-      const { user: registeredUser, token } = response.data.data;
+      const data = response.data.data;
+      if (data.requiresVerification) {
+        return { requiresVerification: true };
+      }
+      const { user: registeredUser, token } = data;
       localStorage.setItem('token', token);
       setUser(registeredUser);
       return registeredUser;
     } finally {
       setLoading(false);
     }
+  };
+
+  const loginWithToken = (loggedUser, token) => {
+    localStorage.setItem('token', token);
+    setUser(loggedUser);
   };
 
   const logout = () => {
@@ -65,6 +74,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     register,
+    loginWithToken,
     logout
   };
 

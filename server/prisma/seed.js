@@ -177,13 +177,14 @@ async function main() {
   // Seed Alice (Customer)
   await prisma.user.upsert({
     where: { email: 'alice@example.com' },
-    update: {},
+    update: { isEmailVerified: true },
     create: {
       email: 'alice@example.com',
       passwordHash,
       role: 'CUSTOMER',
       name: 'Alice Customer',
-      phone: '1234567890'
+      phone: '1234567890',
+      isEmailVerified: true
     }
   });
   console.log('✅ Seeded Customer: alice@example.com');
@@ -191,13 +192,14 @@ async function main() {
   // Seed Admin
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
-    update: {},
+    update: { isEmailVerified: true },
     create: {
       email: 'admin@example.com',
       passwordHash,
       role: 'ADMIN',
       name: 'System Admin',
-      phone: '5555555555'
+      phone: '5555555555',
+      isEmailVerified: true
     }
   });
   console.log('✅ Seeded Admin: admin@example.com');
@@ -212,6 +214,7 @@ async function main() {
         role: 'AGENT',
         name: 'Bob Agent',
         phone: '9876543210',
+        isEmailVerified: true,
         agentProfile: {
           create: {
             licenseNumber: 'LIC-BOB-9988',
@@ -224,7 +227,12 @@ async function main() {
     });
     console.log(`✅ Seeded Agent Bob: ${bob.email}`);
   } else {
-    console.log('ℹ️ Bob Agent already exists. Skipping profile creation.');
+    // Force email verified if it exists
+    await prisma.user.update({
+      where: { email: 'bob@example.com' },
+      data: { isEmailVerified: true }
+    });
+    console.log('ℹ️ Bob Agent already exists. Set verified.');
   }
 
   // Seed John (Agent with linked AgentProfile)
@@ -238,6 +246,7 @@ async function main() {
         role: 'AGENT',
         name: 'John Agent',
         phone: '9876001122',
+        isEmailVerified: true,
         agentProfile: {
           create: {
             licenseNumber: 'LIC-JOHN-5432',
@@ -250,7 +259,12 @@ async function main() {
     });
     console.log(`✅ Seeded Agent John: ${john.email}`);
   } else {
-    console.log('ℹ️ John Agent already exists. Skipping profile creation.');
+    // Force email verified if it exists
+    await prisma.user.update({
+      where: { email: 'john@example.com' },
+      data: { isEmailVerified: true }
+    });
+    console.log('ℹ️ John Agent already exists. Set verified.');
   }
 
   console.log('🌱 Comprehensive seeding completed.');

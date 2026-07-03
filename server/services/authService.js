@@ -1,9 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
+import prisma from '../config/prismaClient.js';
 import userRepository from '../repositories/userRepository.js';
 import agentRepository from '../repositories/agentRepository.js';
-import { ConflictError, UnauthorizedError, NotFoundError } from '../middleware/errorHandler.js';
+import notificationService from './notificationService.js';
+import { ConflictError, UnauthorizedError, NotFoundError, BadRequestError } from '../middleware/errorHandler.js';
 
 export class AuthService {
   /**
@@ -31,24 +33,30 @@ export class AuthService {
     // 3. Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 4. Create User (and profile if agent)
+    // 4. Generate Verification OTP code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
+
+    // 5. Create User (and profile if agent)
     let user;
     if (role === 'AGENT') {
       user = await userRepository.createAgent(
-        { email, passwordHash, name, phone },
+        { email, passwordHash, name, phone, isEmailVerified: false, emailVerificationOtp: otp, emailVerificationExpires: expires },
         { vehicleType, licenseNumber }
       );
     } else {
-      user = await userRepository.createCustomer({ email, passwordHash, name, phone });
+      user = await userRepository.createCustomer({
+        email, passwordHash, name, phone, isEmailVerified: false, emailVerificationOtp: otp, emailVerificationExpires: expires
+      });
     }
+
+    // Send Verification Email
+    await notificationService.sendVerificationOtp(email, name, otp);
 
     // Remove sensitive information
     delete user.passwordHash;
 
-    // 5. Generate Token
-    const token = this.generateToken(user);
-
-    return { user, token };
+    return { user, requiresVerification: true };
   }
 
   /**
@@ -71,13 +79,93 @@ export class AuthService {
       throw new UnauthorizedError('Invalid email or password');
     }
 
+    // 3. Enforce email verification check
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedError('EMAIL_NOT_VERIFIED');
+    }
+
     // Remove sensitive information
     delete user.passwordHash;
 
-    // 3. Generate token
+    // 4. Generate token
     const token = this.generateToken(user);
 
     return { user, token };
+  }
+
+  /**
+   * Verify registration OTP and activate user account.
+   * @param {string} email 
+   * @param {string} otp 
+   * @returns {Promise<object>}
+   */
+  async verifyOtp(email, otp) {
+    const user = await prisma.user.findFirst({
+      where: { email, deletedAt: null }
+    });
+    if (!user) {
+      throw new NotFoundError('User account not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestError('Email address is already verified');
+    }
+
+    if (user.emailVerificationOtp !== otp) {
+      throw new BadRequestError('Invalid verification OTP code');
+    }
+
+    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
+      throw new BadRequestError('Verification OTP code has expired');
+    }
+
+    // Update user to verified
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isEmailVerified: true,
+        emailVerificationOtp: null,
+        emailVerificationExpires: null
+      }
+    });
+
+    delete updatedUser.passwordHash;
+    const token = this.generateToken(updatedUser);
+
+    return { user: updatedUser, token };
+  }
+
+  /**
+   * Resend a fresh verification OTP code.
+   * @param {string} email 
+   * @returns {Promise<object>}
+   */
+  async resendOtp(email) {
+    const user = await prisma.user.findFirst({
+      where: { email, deletedAt: null }
+    });
+    if (!user) {
+      throw new NotFoundError('User account not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestError('Email address is already verified');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerificationOtp: otp,
+        emailVerificationExpires: expires
+      }
+    });
+
+    await notificationService.sendVerificationOtp(user.email, user.name, otp);
+
+    return { success: true, message: 'Verification code resent successfully' };
   }
 
   /**

@@ -26,6 +26,7 @@ import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ManageZones from './pages/admin/ManageZones.jsx';
 import ManageAreas from './pages/admin/ManageAreas.jsx';
 import ManageRateCards from './pages/admin/ManageRateCards.jsx';
+import VerifyOtp from './pages/auth/VerifyOtp.jsx';
 
 // Helper component to redirect based on auth status & role
 const RootRedirect = () => {
@@ -56,6 +57,7 @@ function App() {
           {/* Public Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
 
           {/* Customer Scoped Dashboard Routes */}
           <Route

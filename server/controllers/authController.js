@@ -38,14 +38,37 @@ export class AuthController {
     }
   }
 
-  /**
-   * Fetch current authenticated user profile.
-   */
   async me(req, res, next) {
     try {
       const userId = req.user.id;
       const user = await authService.getProfile(userId);
       res.status(200).json(successResponse('Current user context fetched successfully', { user }));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async verifyOtp(req, res, next) {
+    try {
+      const { email, otp } = req.body;
+      if (!email || !otp) {
+        return next(new UnprocessableEntityError('Email and OTP code are required.'));
+      }
+      const result = await authService.verifyOtp(email, otp);
+      res.status(200).json(successResponse('Email verified and logged in successfully', result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resendOtp(req, res, next) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return next(new UnprocessableEntityError('Email address is required.'));
+      }
+      const result = await authService.resendOtp(email);
+      res.status(200).json(successResponse('Verification code resent successfully', result));
     } catch (error) {
       next(error);
     }

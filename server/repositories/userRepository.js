@@ -48,7 +48,10 @@ export class UserRepository {
         passwordHash: userData.passwordHash,
         name: userData.name,
         phone: userData.phone,
-        role: 'CUSTOMER'
+        role: 'CUSTOMER',
+        isEmailVerified: userData.isEmailVerified || false,
+        emailVerificationOtp: userData.emailVerificationOtp || null,
+        emailVerificationExpires: userData.emailVerificationExpires || null
       }
     });
   }
@@ -68,7 +71,10 @@ export class UserRepository {
           passwordHash: userData.passwordHash,
           name: userData.name,
           phone: userData.phone,
-          role: 'AGENT'
+          role: 'AGENT',
+          isEmailVerified: userData.isEmailVerified || false,
+          emailVerificationOtp: userData.emailVerificationOtp || null,
+          emailVerificationExpires: userData.emailVerificationExpires || null
         }
       });
 
