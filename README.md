@@ -20,6 +20,8 @@ A modern, robust, and highly aesthetic logistics web application designed to aut
 * **Auto-Assign Dispatch Engine**: Automated assignment of orders to the nearest available driver operating in the order's pickup zone with load balancing thresholds.
 * **Volumetric Rate Calculator**: Automatically calculates shipping charges based on package dimensional volume ($L \times W \times H$) or actual weight against configurable zone-to-zone base rate cards.
 * **Live Chronological Timeline Tracking**: Real-time delivery logs, status updates, and custom operator annotation notes.
+* **Email Verification & Safety**: 6-digit OTP security validation for new users upon registration/login, powered by transactional mail engines.
+* **Hybrid Notification System**: Support for HTTP-based email APIs (Resend/SendGrid) to bypass cloud host firewall blocks (Port 443), with automatic legacy SMTP/mock fallbacks.
 
 ---
 
@@ -75,6 +77,22 @@ PORT=5001
 DATABASE_URL="postgresql://user:password@localhost:5432/delivery_db?schema=public"
 JWT_SECRET="YOUR_SUPER_SECURE_JWT_SECRET_KEY"
 JWT_EXPIRES_IN="7d"
+
+# Notification settings (Choose one configuration)
+# Option A: Resend HTTP API (Recommended for Render.app)
+RESEND_API_KEY="re_your_resend_api_key"
+SMTP_FROM="Last Mile Tracker <noreply@yourdomain.com>"
+
+# Option B: SendGrid HTTP API
+# SENDGRID_API_KEY="SG.your_sendgrid_key"
+# SMTP_FROM="your_verified_sender_email@gmail.com"
+
+# Option C: Legacy SMTP / Mail Server
+# SMTP_HOST="smtp.gmail.com"
+# SMTP_PORT=587
+# SMTP_USER="your-email@gmail.com"
+# SMTP_PASS="your-app-password"
+# SMTP_FROM="Last Mile Tracker <your-email@gmail.com>"
 ```
 
 ### 3. Initialize Server and Database
