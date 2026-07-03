@@ -471,7 +471,7 @@ export const AdminDashboard = () => {
                         </td>
                         <td class="p-4 text-right flex items-center justify-end gap-2">
                           <Link
-                            to={`/customer/track-order?id=${order.id}`}
+                            to={`/customer/track/${order.id}`}
                             class="p-2 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all"
                             title="View tracking timeline"
                           >
