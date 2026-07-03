@@ -8,6 +8,7 @@ export const CustomerDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,21 +49,37 @@ export const CustomerDashboard = () => {
     };
     return (
       <span class={`px-2.5 py-1 text-xs font-semibold rounded-full border ${styles[status] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-        {status.replace('_', ' ')}
+        {status}
       </span>
     );
   };
 
+  const filteredOrders = orders.filter(order => {
+    if (statusFilter === '') return true;
+    if (statusFilter === 'ACTIVE') {
+      return !['DELIVERED', 'FAILED'].includes(order.status);
+    }
+    return order.status === statusFilter;
+  });
+
   return (
     <div class="space-y-8">
+      {/* Header */}
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Customer Portal</h2>
+          <p class="text-gray-500 mt-1">Book shipments, calculate rates, and monitor your delivery timeline.</p>
+        </div>
+      </div>
+
       {error && (
         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-3">
-          <AlertCircle class="h-5 w-5 text-red-500" />
+          <AlertCircle class="h-5 w-5" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* KPI Cards */}
+      {/* KPI Stats */}
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
           <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
@@ -79,7 +96,7 @@ export const CustomerDashboard = () => {
             <CheckCircle2 class="h-6 w-6" />
           </div>
           <div>
-            <p class="text-sm font-semibold text-gray-500">Delivered</p>
+            <p class="text-sm font-semibold text-gray-500">Completed Shipments</p>
             <h3 class="text-2xl font-bold text-gray-900">{summary?.completedOrders || 0}</h3>
           </div>
         </div>
@@ -97,22 +114,35 @@ export const CustomerDashboard = () => {
 
       {/* Orders List Table */}
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
+        <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50/50">
           <div class="flex items-center gap-2">
             <Package class="h-5 w-5 text-gray-500" />
             <h3 class="font-bold text-gray-900">Your Delivery Orders</h3>
           </div>
-          <Link
-            to="/customer/place-order"
-            class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
-          >
-            + Create New Order
-          </Link>
+          
+          <div class="flex items-center gap-3 self-end">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none"
+            >
+              <option value="">All Statuses</option>
+              <option value="ACTIVE">Active Shipments</option>
+              <option value="DELIVERED">Delivered (History)</option>
+              <option value="FAILED">Failed</option>
+            </select>
+            <Link
+              to="/customer/place-order"
+              class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+            >
+              + Create New Order
+            </Link>
+          </div>
         </div>
 
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div class="p-12 text-center text-gray-500">
-            <p class="text-sm">No orders placed yet.</p>
+            <p class="text-sm">No orders found.</p>
           </div>
         ) : (
           <div class="overflow-x-auto">
@@ -121,16 +151,26 @@ export const CustomerDashboard = () => {
                 <tr class="text-xs font-semibold text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                   <th class="p-4">Order Number</th>
                   <th class="p-4">Date</th>
+                  <th class="p-4">Assigned Agent</th>
                   <th class="p-4">Final Price</th>
                   <th class="p-4">Status</th>
                   <th class="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 text-sm">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <tr key={order.id} class="hover:bg-gray-50/50 transition-colors">
                     <td class="p-4 font-bold text-gray-900">{order.orderNumber}</td>
                     <td class="p-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td class="p-4 text-xs font-semibold text-gray-600">
+                      {order.agent ? (
+                        <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100">
+                          {order.agent.name}
+                        </span>
+                      ) : (
+                        <span class="text-gray-400 italic">Unassigned</span>
+                      )}
+                    </td>
                     <td class="p-4 font-semibold text-gray-950">₹{order.price.toFixed(2)}</td>
                     <td class="p-4">{getStatusBadge(order.status)}</td>
                     <td class="p-4 text-right">

@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Truck,
   Compass,
-  Settings
+  Settings,
+  Filter
 } from 'lucide-react';
 
 export const AgentDashboard = () => {
@@ -24,6 +25,7 @@ export const AgentDashboard = () => {
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   
   // Agent profile configs
   const [agentStatus, setAgentStatus] = useState('OFFLINE');
@@ -144,39 +146,51 @@ export const AgentDashboard = () => {
     );
   }
 
+  const filteredOrders = orders.filter(order => {
+    if (statusFilter === '') return true;
+    if (statusFilter === 'ACTIVE') {
+      return !['DELIVERED', 'FAILED'].includes(order.status);
+    }
+    return order.status === statusFilter;
+  });
+
   return (
     <div class="space-y-8">
+      {/* Header */}
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Agent Portal</h2>
+          <p class="text-gray-500 mt-1">Manage assigned deliveries, update operational status, and trace workloads.</p>
+        </div>
+      </div>
+
       {error && (
         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-3">
-          <AlertCircle class="h-5 w-5 text-red-500" />
+          <AlertCircle class="h-5 w-5" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Profile Toggle Box */}
+      {/* Quick Actions Configs */}
       <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Availability Toggle */}
+        {/* Status Toggle */}
         <div class="flex items-center justify-between border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 md:pr-6">
           <div class="flex items-center gap-3">
-            <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600">
+            <div class={`p-3 rounded-lg ${agentStatus === 'OFFLINE' ? 'bg-gray-100 text-gray-500' : 'bg-green-50 text-green-600'}`}>
               <Truck class="h-6 w-6" />
             </div>
             <div>
-              <h4 class="font-bold text-gray-900">Agent Status</h4>
-              <p class="text-xs text-gray-500 mt-0.5">Toggle availability to receive order assignments.</p>
+              <h4 class="font-bold text-gray-900">Work Status</h4>
+              <p class="text-xs text-gray-500 mt-0.5">Toggle availability to receive dispatch matches.</p>
             </div>
           </div>
           <select
             value={agentStatus}
             onChange={handleStatusToggle}
-            class={`px-3 py-2 border rounded-lg text-sm font-semibold focus:outline-none ${
-              agentStatus === 'AVAILABLE'
-                ? 'border-indigo-200 text-indigo-700 bg-indigo-50'
-                : 'border-slate-300 text-slate-700 bg-slate-50'
-            }`}
+            class="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white font-semibold"
           >
-            <option value="AVAILABLE">AVAILABLE</option>
             <option value="OFFLINE">OFFLINE</option>
+            <option value="AVAILABLE">ONLINE (AVAILABLE)</option>
           </select>
         </div>
 
@@ -239,16 +253,33 @@ export const AgentDashboard = () => {
 
       {/* Assigned Orders Table */}
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-200 flex items-center gap-2 bg-gray-50/50">
-          <Package class="h-5 w-5 text-gray-500" />
-          <h3 class="font-bold text-gray-900">Your Active Deliveries</h3>
+        <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50/50">
+          <div class="flex items-center gap-2">
+            <Package class="h-5 w-5 text-gray-500" />
+            <h3 class="font-bold text-gray-900">Your Deliveries Log</h3>
+          </div>
+          
+          <div class="flex items-center gap-2 self-end">
+            <Filter class="h-4 w-4 text-gray-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs bg-white focus:outline-none"
+            >
+              <option value="">All Assigned</option>
+              <option value="ACTIVE">Active Deliveries</option>
+              <option value="DELIVERED">Delivered (History)</option>
+              <option value="FAILED">Failed</option>
+            </select>
+          </div>
         </div>
 
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div class="p-12 text-center text-gray-500">
-            <p class="text-sm">No active assigned deliveries. Go online to receive orders!</p>
+            <p class="text-sm">No deliveries found matching criteria.</p>
           </div>
         ) : (
+
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
@@ -261,7 +292,7 @@ export const AgentDashboard = () => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 text-sm">
-                {orders.map(order => (
+                {filteredOrders.map(order => (
                   <tr key={order.id} class="hover:bg-gray-50/50 transition-colors">
                     <td class="p-4 font-bold text-gray-900">{order.orderNumber}</td>
                     <td class="p-4 text-gray-600 truncate max-w-xs">{order.pickupAddress}</td>
