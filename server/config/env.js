@@ -13,7 +13,7 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().email().optional().default('noreply@deliverytracker.com')
+  SMTP_FROM: z.string().optional().default('noreply@deliverytracker.com')
 });
 
 const parsed = envSchema.safeParse(process.env);
