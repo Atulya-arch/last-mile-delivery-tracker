@@ -157,6 +157,16 @@ export class OrderService {
       await orderRepository.updateStatus(orderId, status, adminUser.id, `Admin Override: Force Status Update. Reason: ${notes}`);
     }
 
+    // Trigger Notification dynamically on override changes
+    if (status !== undefined || agentId !== undefined) {
+      try {
+        const notificationService = (await import('./notificationService.js')).default;
+        await notificationService.sendOrderStatusEmail(orderId);
+      } catch (err) {
+        console.error('⚠️ [AdminOverride] Notification trigger error:', err.message);
+      }
+    }
+
     return orderRepository.findById(orderId);
   }
 

@@ -102,7 +102,15 @@ class NotificationService {
           bodyText += 'Congratulations! Your package has been successfully delivered.';
           break;
         case 'FAILED':
-          bodyText += `Delivery attempt failed. Reason: ${order.failedReason || 'Unspecified'}. You can reschedule a delivery attempt from your dashboard.`;
+          const latestHistory = order.trackingHistory && order.trackingHistory.length > 0 
+            ? order.trackingHistory[order.trackingHistory.length - 1] 
+            : null;
+          const failureReason = latestHistory?.notes || order.failedReason || 'Unspecified';
+          if (failureReason.toLowerCase().includes('cancel')) {
+            bodyText += `Your order has been cancelled by the administrator. Details: ${failureReason}`;
+          } else {
+            bodyText += `Delivery attempt failed. Reason: ${failureReason}. You can reschedule a delivery attempt from your dashboard.`;
+          }
           break;
         case 'RESCHEDULED':
           bodyText += 'Your order has been successfully rescheduled for delivery.';
