@@ -50,8 +50,10 @@ export class AuthService {
       });
     }
 
-    // Send Verification Email
-    await notificationService.sendVerificationOtp(email, name, otp);
+    // Send Verification Email (Asynchronously in background)
+    notificationService.sendVerificationOtp(email, name, otp).catch(err => {
+      console.error('⚠️ [AuthRegister] Background OTP dispatch failed:', err.message);
+    });
 
     // Remove sensitive information
     delete user.passwordHash;
