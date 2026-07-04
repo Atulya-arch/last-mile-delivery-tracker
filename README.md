@@ -25,6 +25,28 @@ A modern, robust, and highly aesthetic logistics web application designed to aut
 
 ---
 
+## 📐 Shipping Rate Calculation Formula
+
+The application evaluates dimensional volumetric criteria and actual weight metrics dynamically using configured zone-to-zone Rate Cards to compute shipping rates:
+
+1. **Volumetric Weight (kg)**:
+   $$\text{Volumetric Weight} = \frac{\text{Length (cm)} \times \text{Width (cm)} \times \text{Height (cm)}}{\text{Volumetric Divisor (default: 5000)}}$$
+   *(The volumetric divisor is configurable in the `SystemConfig` DB settings table).*
+
+2. **Billable Weight (kg)**:
+   $$\text{Billable Weight} = \max(\text{Actual Weight}, \text{Volumetric Weight})$$
+
+3. **Weight Surcharge (₹)**:
+   - If $\text{Billable Weight} > \text{Base Weight Limit}$:
+     $$\text{Weight Surcharge} = (\text{Billable Weight} - \text{Base Weight Limit}) \times \text{Price per Extra KG}$$
+   - If $\text{Billable Weight} \le \text{Base Weight Limit}$:
+     $$\text{Weight Surcharge} = 0$$
+
+4. **Final Order Price (₹)**:
+   $$\text{Final Price} = \text{Base Price} + \text{Weight Surcharge} + \text{COD Surcharge (if Payment Mode is COD)}$$
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer | Technologies |
