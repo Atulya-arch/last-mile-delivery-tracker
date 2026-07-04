@@ -15,14 +15,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health Check Route
-app.get('/health', async (req, res, next) => {
+// Health Check Route (UptimeRobot / Lightweight)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Database Connectivity Health Check Route (Manual Testing Only)
+app.get('/health/db', async (req, res, next) => {
   try {
-    // Basic test of database connectivity
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
-      status: 'UP',
-      database: 'CONNECTED',
+      success: true,
+      message: "Database is healthy",
       timestamp: new Date().toISOString()
     });
   } catch (error) {
